@@ -1,0 +1,5 @@
+[workspace]
+members = [
+  "not-a-teapot",
+  "in-video-veritas",
+]
