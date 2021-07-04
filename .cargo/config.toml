@@ -1,0 +1,5 @@
+# This is not used as the feature is only in nightly.
+# Should be available in a bit though.
+[env]
+YEAST_ADDR = "0.0.0.0:3333"
+YEAST_LOG_LEVEL = "DEBUG"

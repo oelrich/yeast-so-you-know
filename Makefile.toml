@@ -1,0 +1,42 @@
+[config]
+default_to_workspace = false
+
+[env]
+YEAST_ADDR = "0.0.0.0:3333"
+YEAST_LOG_LEVEL = "DEBUG"
+
+[tasks.format]
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--", "--emit=files"]
+
+[tasks.clean]
+command = "cargo"
+args = ["clean"]
+
+[tasks.build]
+command = "cargo"
+args = ["build"]
+dependencies = ["clean"]
+
+[tasks.dirtybuild]
+command = "cargo"
+args = ["build"]
+
+[tasks.dev]
+command = "cargo"
+args = ["run"]
+dependencies = ["dirtybuild"]
+watch = true
+
+[tasks.test]
+command = "cargo"
+args = ["test"]
+dependencies = ["clean"]
+
+[tasks.my-flow]
+dependencies = [
+    "format",
+    "build",
+    "test"
+]

@@ -1,3 +1,27 @@
 = Imagine all the somethings
 
 Serves pictures from the Raspberry Pi camera.
+
+== Configuration
+
+An environment variable overrides defaults, a command line argument overrides an environment variable.
+
+.Configuration
+|===
+|Property |Default |Environment variable |CLI argument
+
+|Socket address |`0.0.0.0:80` |`YEAST_ADDR` |`--address` (`-a`)
+|Log filter |`INFO` |`YEAST_LOG_LEVEL` |`--log-filter` (`-l`)
+
+|===
+
+== Building
+
+Uses the https://github.com/sagiegurari/cargo-make[cargo-make] helper.
+
+.Run with developer defaults
+....
+
+cargo make run
+
+....

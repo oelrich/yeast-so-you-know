@@ -2,12 +2,10 @@ use warp::{Filter, http::Response};
 
 mod cli;
 
-
-
 #[tokio::main]
 async fn main() {
     let addr = cli::init();
-    let hello = warp::path!("hello" / String).map(|name| format!("Hello, {}!", name));
+    let hello = warp::path!("hello" / String).map(|name| format!("Hello there, {}!", name));
     let camera = warp::path!("camera").map(|| {
         Response::builder()
             .header("content-type", "image/jpeg")

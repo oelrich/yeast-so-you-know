@@ -6,7 +6,7 @@ pub fn get_the_picture() -> Vec<u8> {
     if !info.cameras.is_empty() {
         let mut camera = rascam::SimpleCamera::new(info.cameras[0].clone()).unwrap();
         camera.activate().unwrap();
-        let sleep_duration = time::Duration::from_millis(2000);
+        let sleep_duration = time::Duration::from_millis(1000);
         thread::sleep(sleep_duration);
         return camera.take_one().unwrap();
     }

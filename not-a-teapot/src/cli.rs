@@ -1,4 +1,5 @@
 use structopt::StructOpt;
+use tracing::{event, Level};
 fn get_address(addr: &Option<std::net::SocketAddr>) -> std::net::SocketAddr {
     if let Some(address) = addr {
         return *address;
@@ -6,7 +7,7 @@ fn get_address(addr: &Option<std::net::SocketAddr>) -> std::net::SocketAddr {
     if let Some(address) = get_env_addr("YEAST_ADDR") {
         return address;
     }
-    std::net::SocketAddr::from(([0, 0, 0, 0], 8080))
+    std::net::SocketAddr::from(([0, 0, 0, 0], 80))
 }
 
 fn get_log_filter(logging: &Option<String>) -> String {
@@ -31,6 +32,8 @@ pub fn init() -> std::net::SocketAddr {
         .finish();
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
+    event!(Level::INFO,"Starting");
+    
     get_address(&cli.address)
 }
 
@@ -45,5 +48,11 @@ struct Cli {
 
 fn get_env_addr(name: &str) -> Option<std::net::SocketAddr> {
   // This is *not* pretty ...
-  std::env::var(name).ok().map(|addr|addr.parse().ok()).flatten()
+  std::env::var(name).ok().map(|addr| match addr.parse() {
+      Ok(address) => Some(address),
+      Err(_err) => {      
+        event!(Level::ERROR,"{} provided but not an address", name);
+        None
+      }
+   }).flatten()
 }
