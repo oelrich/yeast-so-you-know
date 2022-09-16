@@ -8,4 +8,7 @@ edition = "2021"
 [dependencies]
 tokio = "1"
 tracing = "0.1"
+uvc = "0.2"
+
+[target.'cfg(unix)'.dependencies]
 rascam = "0"

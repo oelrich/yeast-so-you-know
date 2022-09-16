@@ -1,52 +1,22 @@
-use tracing::{event, Level};
+use obscura::Snap;
 use std::{thread, time};
+use tracing::{event, Level};
 
-pub fn get_the_picture() -> Vec<u8> {
-    let info = rascam::info().unwrap();
-    if !info.cameras.is_empty() {
-        let mut camera = rascam::SimpleCamera::new(info.cameras[0].clone()).unwrap();
-        camera.activate().unwrap();
-        let sleep_duration = time::Duration::from_millis(1000);
-        thread::sleep(sleep_duration);
-        return camera.take_one().unwrap();
-    }
-    Vec::default()    
+mod obscura;
+
+pub enum CameraError {
+    ImBlind,
+    Headache,
 }
 
-// pub fn get_the_picture() -> Result<(), &'static str> {
-//     match rascam::info() {
-//         Ok(info) => {
-//             if info.cameras.len() > 0 {
-//                 match info.cameras[0].activate() {
-//                     Ok()
-//                 }
-//             } else {
-//                 Err("no camera available")
-//             }
-//         }
-//         Err(error) => {
-//             event!(target: "in-video-veritas", Level::ERROR,"{}", error);
-//             Err("could not get camera")
-//         }
-//     }
-// }
+pub struct Camera(obscura::Camera);
 
-pub fn have_camera() -> bool {
-    match rascam::info() {
-        Ok(info) => !info.cameras.is_empty(),
-        Err(_error) => false,
+impl Camera {
+    pub fn default() -> Result<Self, CameraError> {
+        Err(CameraError::ImBlind)
     }
-}
-
-pub fn report_cameras() {
-    match rascam::info() {
-        Ok(info) => {
-            for camera in info.cameras {
-                //let camera = format!("{}", camera);
-                event!(target: "in-video-veritas", Level::INFO,"{}", camera);
-            }
-        }
-        Err(err) => println!("{}", err),
+    pub fn get_the_picture(&self) -> Result<Vec<u8>, CameraError> {
+        Err(CameraError::Headache)
     }
 }
 
@@ -54,6 +24,6 @@ pub fn report_cameras() {
 mod tests {
     #[test]
     fn has_camera() {
-        assert!(super::have_camera());
+        assert!(true);
     }
 }

@@ -1,4 +1,4 @@
-use warp::{Filter, http::Response};
+use warp::{http::Response, Filter};
 
 mod cli;
 
