@@ -5,6 +5,7 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+<<<<<<< HEAD
 [dependencies]
 tokio = "1"
 tracing = "0.1"
@@ -12,3 +13,11 @@ uvc = "0.2"
 
 [target.'cfg(unix)'.dependencies]
 rascam = "0"
+=======
+[dependencies.tokio]
+version = "1"
+[dependencies.tracing]
+version = "0.1"
+[dependencies.rascam]
+version = "0"
+>>>>>>> adc97b5d4b93dcc79a2eb7a4f26ef1b9ab869216

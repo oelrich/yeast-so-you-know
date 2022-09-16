@@ -32,8 +32,7 @@ pub fn init() -> std::net::SocketAddr {
         .finish();
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
-    event!(Level::INFO,"Starting");
-    
+    event!(Level::INFO, "Starting");
     get_address(&cli.address)
 }
 
@@ -47,12 +46,15 @@ struct Cli {
 }
 
 fn get_env_addr(name: &str) -> Option<std::net::SocketAddr> {
-  // This is *not* pretty ...
-  std::env::var(name).ok().map(|addr| match addr.parse() {
-      Ok(address) => Some(address),
-      Err(_err) => {      
-        event!(Level::ERROR,"{} provided but not an address", name);
-        None
-      }
-   }).flatten()
+    // This is *not* pretty ...
+    std::env::var(name)
+        .ok()
+        .map(|addr| match addr.parse() {
+            Ok(address) => Some(address),
+            Err(_err) => {
+                event!(Level::ERROR, "{} provided but not an address", name);
+                None
+            }
+        })
+        .flatten()
 }
