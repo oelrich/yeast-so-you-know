@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="/assets/site.css" rel="stylesheet" />
+  <link rel="preconnect" href="https://rsms.me/">
+  <link href="https://rsms.me/inter/inter.css" rel="stylesheet" />
+
+  <title>{% block title %}{{ title }}{% endblock %}</title>
+  <script src="https://unpkg.com/htmx.org@1.9.9"></script>
+  {% block head %}{% endblock %}
+</head>
+
+<body>
+  <div id="content">{% block content %}{% endblock %}</div>
+</body>
+
+</html>

@@ -1,29 +1,19 @@
-use obscura::Snap;
-use std::{thread, time};
+
 use tracing::{event, Level};
 
-mod obscura;
+pub fn get_the_picture() -> anyhow::Result<Vec<u8>> {
+    event!(Level::DEBUG, "snap");
+    let index = nokhwa::utils::CameraIndex::Index(0);
+    let requested = nokhwa::utils::RequestedFormat::new::<nokhwa::pixel_format::RgbFormat>(nokhwa::utils::RequestedFormatType::AbsoluteHighestResolution);
 
-pub enum CameraError {
-    ImBlind,
-    Headache,
-}
+    let mut camera = nokhwa::Camera::new(index, requested)?;
+    let frame = camera.frame()?;
 
-pub struct Camera(obscura::Camera);
+    let image = frame.decode_image::<nokhwa::pixel_format::RgbFormat>()?;
+    
+    let mut bytes: Vec<u8> = Vec::new();
 
-impl Camera {
-    pub fn default() -> Result<Self, CameraError> {
-        Err(CameraError::ImBlind)
-    }
-    pub fn get_the_picture(&self) -> Result<Vec<u8>, CameraError> {
-        Err(CameraError::Headache)
-    }
-}
+    image.write_to(&mut std::io::Cursor::new(&mut bytes), image::ImageOutputFormat::Png)?;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn has_camera() {
-        assert!(true);
-    }
+    Ok(bytes)
 }

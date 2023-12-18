@@ -1,52 +1,74 @@
-use warp::{http::Response, Filter};
+use tracing::info;
 
 mod cli;
-
-#[derive(Debug)]
-enum Action {
-    Up,
-    Down,
-}
-
-impl std::fmt::Display for Action {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
-        match self {
-            Self::Up => write!(fmt, "Go UP!"),
-            Self::Down => write!(fmt, "Go DOWN!"),
-        }
-    }
-}
-
-impl std::str::FromStr for Action {
-    type Err = u128;
-    fn from_str(input: &str) -> std::result::Result<Self, <Self as std::str::FromStr>::Err> {
-        match input {
-            "up" => Ok(Self::Up),
-            "down" => Ok(Self::Down),
-            _ => Err(404),
-        }
-    }
-}
+mod api;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     // Setup and get an address to serve on
-    let addr = cli::init();
+    let (addr, asset_path) = cli::init()?;
+
     // Server endpoints
-    let hello = warp::path!("hello" / String).map(|name| format!("Hello there, {}!", name));
-    let good_bye = warp::path!("bye").map(|| "Bye!");
-
-    let next_value = warp::path!("do" / Action).map(|action| format!("Action: {}", action));
-
-    let camera = warp::path!("camera").map(|| {
-        Response::builder()
-            .header("content-type", "image/jpeg")
-            .body(in_video_veritas::get_the_picture())
-    });
 
     // Server API
-    let api = warp::any().and(hello.or(good_bye).or(next_value).or(camera));
+    let router = axum::Router::new()
+        .nest("/api", api::router())
+        .route("/", axum::routing::get(index))
+        .nest_service("/favicon.ico", tower_http::services::ServeFile::new(asset_path.join("favicon.ico")))
+        .nest_service("/assets", tower_http::services::ServeDir::new(asset_path.clone()));
+
+    // Listener
+    info!("Serving at {addr}");
+    info!("Assets at {}", asset_path.clone().display());
+    let listener = tokio::net::TcpListener::bind(addr).await?;
 
     // Server!
-    warp::serve(api).run(addr).await;
+    info!("Starting, hit Ctrl+C to exit");
+    axum::serve(listener, router).await?;
+    Ok(())
+}
+
+#[derive(askama::Template)]
+#[template(path = "index.html")]
+struct IndexTemplate;
+
+async fn index() -> impl axum::response::IntoResponse {
+    let template = IndexTemplate {};
+    HtmlTemplate(template)
+}
+
+struct HtmlTemplate<T>(T);
+
+impl<T> axum::response::IntoResponse for HtmlTemplate<T>
+where
+    T: askama::Template,
+{
+    fn into_response(self) -> axum::response::Response {
+        match self.0.render() {
+            Ok(html) => axum::response::Html(html).into_response(),
+            Err(err) => (
+                axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to render template. Error: {}", err),
+            )
+                .into_response(),
+        }
+    }
+}
+
+struct BadTea(anyhow::Error);
+
+impl axum::response::IntoResponse for BadTea {
+    fn into_response(self) -> axum::response::Response {
+        (axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+        format!("Kablooey! {}", self.0)).into_response()
+    }
+}
+
+impl<E> From<E> for BadTea
+where
+    E: Into<anyhow::Error>,
+{
+    fn from(err: E) -> Self {
+        Self(err.into())
+    }
 }
